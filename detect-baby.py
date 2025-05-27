@@ -72,5 +72,5 @@ def classify_baby_pose(image_path):
     return pose_label
 
 # Thay đường dẫn ảnh phù hợp với bạn
-result = classify_baby_pose("C:/Screenshot 2025-05-27 134858.png")
+result = classify_baby_pose("./a/nam_sap_18.jpg")
 print("Kết quả:", result)
