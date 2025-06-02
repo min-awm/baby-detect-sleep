@@ -10,7 +10,7 @@ app = FastAPI()
 @app.get("/")
 def read_root():
     a()
-    return {"Hello": "Worcld"}
+    return {"Hello": "wws"}
 
 @app.post("/upload")
 async def upload_image(file: UploadFile = File(...)):
@@ -20,7 +20,7 @@ async def upload_image(file: UploadFile = File(...)):
     # filename = f"{folder_image}/{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
     # with open(filename, "wb") as f:
     #     f.write(contents)
-    print(contents)
+    # print(contents)
 
     return JSONResponse({"status": "success"})
 
