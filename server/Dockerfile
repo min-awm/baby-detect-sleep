@@ -12,6 +12,10 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_BREAK_SYSTEM_PACKAGES=1
 
+# Copy project
+COPY . /app
+WORKDIR /app
+
 # Install dependencies
 RUN apt-get update && apt-get install -y libgl1 libegl1
 RUN /bin/bash -c "source activate server_conda && \
@@ -29,10 +33,6 @@ RUN /bin/bash -c "source activate server_conda && \
     ultralytics \
     -y"
 RUN /bin/bash -c "source activate server_conda && pip install -r requirements.txt"
-
-# Copy project
-COPY . /app
-WORKDIR /app
     
 # Expose FastAPI port
 EXPOSE 8000

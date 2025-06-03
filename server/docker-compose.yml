@@ -6,4 +6,6 @@ services:
     volumes:
       - .:/app
     working_dir: /app    
+    environment:
+      - YOLO_CONFIG_DIR=/app/configs
     command: ["bash", "-c", "source activate server_conda && fastapi dev main.py --host 0.0.0.0 --port 8000"]
