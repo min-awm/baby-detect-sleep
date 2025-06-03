@@ -1,35 +1,45 @@
 from typing import Union
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, Request, File
+from fastapi.staticfiles import StaticFiles
 import datetime
 import tempfile
 from fastapi.responses import JSONResponse
 from vision.detection import detect
+from helper.path import get_abs_path
+import os
 
 app = FastAPI()
 
-
-@app.get("/")
-def read_root():
-    a()
-    return {"Hello": "wws"}
-
 @app.post("/upload")
-async def upload_image(file: UploadFile = File(...)):
-    contents = await file.read()
+async def upload(request: Request):
+    try:
+        body = await request.body()  # Read raw body
 
-    with tempfile.NamedTemporaryFile(delete=True, suffix=file.filename) as temp:
-        temp.write(contents)
-        detect(temp)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp:
+            temp.write(body)
+            temp.flush()  # Đảm bảo dữ liệu được ghi hết
+
+            # Gọi hàm xử lý ảnh (nhận đường dẫn)
+            detect(temp)
+
+        return JSONResponse(content={"msg": "ok"}, status_code=200)
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+
+@app.post("/sound")
+async def sound(request: Request):
+    try:
+        body = await request.body()  # Read raw body    
+        print(body)
         
-    # folder_image = "./image-upload"
-    # filename = f"{folder_image}/{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
-    # with open(filename, "wb") as f:
-    #     f.write(contents)
-    # print(contents)
+        return JSONResponse(content={"msg": "ok"}, status_code=200)
+    except Exception as e:
+        print(e)
+        return JSONResponse(content={"error": str(e)}, status_code=500)
 
-    return JSONResponse({"status": "success"})
-
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
+# Mount static folder tại root "/"
+# app.mount(
+#     "/", 
+#     StaticFiles(directory=get_abs_path("static", __file__), html=True), 
+#     name="static"
+# )

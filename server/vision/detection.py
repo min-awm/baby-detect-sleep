@@ -1,17 +1,13 @@
 from PIL import Image, ImageDraw
 import io 
 import os
+from firebase.app import send_firebase
 from vision.yolo import get_crib_baby
 from vision.face import get_face, is_face_facing_up, compare
+from helper.path import get_abs_path
 
-script_dir = os.path.dirname(__file__)
-baby_path = "./data/baby/baby_1.jpg"
-abs_baby_path = os.path.join(script_dir, baby_path)
-baby_face = get_face(abs_baby_path)[0]
-
-person_path = "./data/person/person_1.jpeg"
-abs_person_path = os.path.join(script_dir, person_path)
-person_face = get_face(abs_person_path)[0]
+baby_face = get_face(get_abs_path("./data/baby/baby_1.jpg", __file__))[0]
+person_face = get_face(get_abs_path("./data/person/person_1.jpeg", __file__))[0]
 
 def draw_boxes(image_path, crib_boxes, baby_boxes, face_boxes=None, output_path="output.jpg"):
     """Vẽ các bounding box lên ảnh và lưu kết quả"""
@@ -156,9 +152,18 @@ def detect(temp):
         print("em be khong nam trong noi")
     else:
         print("em be nam trong noi")
+
+    
+    send_firebase({
+        'baby': {
+            'face_up': 'eee',
+            'unknown_people': 'ee',
+            'no_baby_in_crib': 'w', 
+        }
+    })
     
     # Vẽ các box lên ảnh
-    output_path = "./result/output.jpg"
-    output_img_path = os.path.join(script_dir, output_path)
+    output_img_path = get_abs_path("./result/output.jpg", __file__)
+    
     output_path = draw_boxes(temp.name, crib_boxes, baby_boxes, face_boxes, output_img_path)
     print(f"Đã lưu ảnh kết quả tại: {output_path}")

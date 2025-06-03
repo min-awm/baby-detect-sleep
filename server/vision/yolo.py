@@ -1,11 +1,8 @@
 from ultralytics import YOLO
 import os
+from helper.path import get_abs_path
 
-script_dir = os.path.dirname(__file__)
-rel_path = "./model/yolo.pt"
-abs_file_path = os.path.join(script_dir, rel_path)
-
-model = YOLO(abs_file_path)
+model = YOLO(get_abs_path("./model/yolo.pt", __file__))
 
 def get_crib_baby(image):
     results = model(image, save=False)
