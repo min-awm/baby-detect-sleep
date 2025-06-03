@@ -1,8 +1,9 @@
 from typing import Union
 from fastapi import FastAPI, UploadFile, File
 import datetime
+import tempfile
 from fastapi.responses import JSONResponse
-from vision.detection import a
+from vision.detection import detect
 
 app = FastAPI()
 
@@ -16,6 +17,10 @@ def read_root():
 async def upload_image(file: UploadFile = File(...)):
     contents = await file.read()
 
+    with tempfile.NamedTemporaryFile(delete=True, suffix=file.filename) as temp:
+        temp.write(contents)
+        detect(temp)
+        
     # folder_image = "./image-upload"
     # filename = f"{folder_image}/{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
     # with open(filename, "wb") as f:

@@ -28,6 +28,7 @@ RUN /bin/bash -c "source activate server_conda && \
     mkl \
     ultralytics \
     -y"
+RUN /bin/bash -c "source activate server_conda && pip install -r requirements.txt"
 
 # Copy project
 COPY . /app
