@@ -1,12 +1,13 @@
+import datetime
+import tempfile
+import os
 from typing import Union
 from fastapi import FastAPI, Request, File
 from fastapi.staticfiles import StaticFiles
-import datetime
-import tempfile
 from fastapi.responses import JSONResponse
-from vision.detection import detect
+from vision.detection import run_detection
 from helper.path import get_abs_path
-import os
+
 
 app = FastAPI()
 
@@ -20,9 +21,9 @@ async def upload(request: Request):
             temp.flush()  # Đảm bảo dữ liệu được ghi hết
 
             # Gọi hàm xử lý ảnh (nhận đường dẫn)
-            detect(temp)
+            results = run_detection(temp)
 
-        return JSONResponse(content={"msg": "ok"}, status_code=200)
+        return JSONResponse(content={"msg": "ok", "results": results}, status_code=200)
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
@@ -30,16 +31,15 @@ async def upload(request: Request):
 async def sound(request: Request):
     try:
         body = await request.body()  # Read raw body    
-        print(body)
-        
+
         return JSONResponse(content={"msg": "ok"}, status_code=200)
     except Exception as e:
         print(e)
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
 # Mount static folder tại root "/"
-# app.mount(
-#     "/", 
-#     StaticFiles(directory=get_abs_path("static", __file__), html=True), 
-#     name="static"
-# )
+app.mount(
+    "/admin", 
+    StaticFiles(directory=get_abs_path("static", __file__), html=True), 
+    name="static"
+)
