@@ -5,9 +5,10 @@ from PIL import Image, ImageDraw
 from vision.yolo import get_crib_baby, check_baby_in_crib, check_face_in_crib, check_baby_down_pose, get_crib_image
 from vision.face import get_faces, get_face_boxes, compare_face
 from helper.path import get_abs_path
+from firebase.app import send_notification_to_user
 
 baby_face = get_faces(get_abs_path("./data/baby/baby_1.jpg", __file__))[0]
-known_face = get_faces(get_abs_path("./data/person/person_1.jpeg", __file__))[0]
+known_face = get_faces(get_abs_path("./data/person/person_1.jpg", __file__))[0]
 
 def draw_boxes(image_path, crib_boxes, baby_boxes, face_boxes):
     """Vẽ các bounding box lên ảnh và lưu kết quả"""
@@ -69,7 +70,21 @@ def run_detection(temp):
 
     # Vẽ các box lên ảnh    
     image_result = draw_boxes(temp.name, crib_boxes, baby_boxes, face_boxes)
- 
+
+    
+    text_notification = "Cảnh báo:"
+    if unknown_person_result:
+        text_notification += " Có người lạ"
+    
+    if baby_in_crib_result:
+        text_notification += " Em bé không ở trong nôi"
+       
+    
+    if baby_down_pose_result:
+        text_notification += " Em bé nằm úp"
+
+    send_notification_to_user(text_notification)
+
     return {
         "unknown_person_result": unknown_person_result,
         "baby_in_crib_result": baby_in_crib_result,

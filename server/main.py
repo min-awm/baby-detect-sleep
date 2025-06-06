@@ -8,7 +8,6 @@ from fastapi.responses import JSONResponse
 from vision.detection import run_detection
 from helper.path import get_abs_path
 
-
 app = FastAPI()
 
 @app.post("/upload")

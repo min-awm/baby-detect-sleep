@@ -1,11 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Ảnh</title>
 </head>
+
 <body>
-    <video></video>ffff
+  <input type="file" id="imageInput" accept="image/jpeg">
+  <button onclick="submitImage()">Gửi ảnh JPEG</button>
+
+  <div id="result" style="margin-top: 20px;"></div>
+
+  <script>
+    const imageInput = document.getElementById('imageInput');
+    const resultDiv = document.getElementById('result');
+
+    async function submitImage() {
+      const file = imageInput.files[0];
+      resultDiv.innerHTML = ""; // Clear cũ
+
+      if (!file) {
+        alert("Vui lòng chọn ảnh JPEG.");
+        return;
+      }
+
+      if (file.type !== 'image/jpeg') {
+        alert("Chỉ chấp nhận ảnh JPEG.");
+        return;
+      }
+
+      try {
+        const response = await fetch('/upload', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'image/jpeg'
+          },
+          body: file
+        });
+
+        const data = await response.json();
+
+        if (data.msg === "ok") {
+          const results = data.results;
+
+          resultDiv.style.color = 'black';
+          resultDiv.innerHTML = `
+            <h3>Kết quả từ server:</h3>
+            <ul>
+              <li><strong>Baby nằm úp:</strong> ${results.baby_down_pose_result}</li>
+              <li><strong>Baby trong cũi:</strong> ${results.baby_in_crib_result}</li>
+              <li><strong>Người lạ:</strong> ${results.unknown_person_result}</li>
+              <li><strong>Ảnh kết quả:</strong><br><img src="${results.image_result}" alt="Kết quả" style="max-width: 90vw; margin-top: 10px;"></li>
+            </ul>
+          `;
+        } else {
+          resultDiv.textContent = "Server trả về lỗi.";
+          resultDiv.style.color = 'red';
+        }
+
+      } catch (err) {
+        console.error(err);
+        resultDiv.textContent = "Lỗi khi gửi ảnh.";
+        resultDiv.style.color = 'red';
+      }
+    }
+  </script>
+
 </body>
+
 </html>
