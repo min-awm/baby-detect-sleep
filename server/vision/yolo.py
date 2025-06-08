@@ -3,34 +3,17 @@ from PIL import Image
 from ultralytics import YOLO
 from helper.path import get_abs_path
 
-crib_baby_model = YOLO(get_abs_path("./model/yolo.pt", __file__))
+person_model = YOLO("yolo11x.pt")
 baby_pose_model = YOLO(get_abs_path("./model/baby_pose.pt", __file__))
 
-def get_crib_baby(image):
-    """Phát hiện các hộp chứa nôi (crib) và trẻ em (child) trong ảnh"""
-    CHILD = 0
-    CRIB = 1
-
-    crib_boxes = []
+def get_baby(image):
+    baby = person_model(image, save=False, classes=0)
     baby_boxes = []
+    for box in baby[0].boxes:
+        boxes = box.xyxy[0].tolist()
+        baby_boxes.append(boxes)
 
-    crib_babies = crib_baby_model(image, save=False)
-
-    if not crib_babies: 
-        return crib_boxes, baby_boxes
-
-    crib_baby = crib_babies[0]
-
-    for box in crib_baby.boxes:
-        cls_id = int(box.cls.item())
-        boxes = box.xyxy[0].tolist()  # [x1, y1, x2, y2]
-        
-        if cls_id == CRIB:
-            crib_boxes.append(boxes)
-        elif cls_id == CHILD:
-            baby_boxes.append(boxes)
-
-    return crib_boxes, baby_boxes
+    return baby_boxes
 
 def percent_inside(inner_box, outer_box):
     """Tính tỷ lệ diện tích của inner_box nằm trong outer_box"""
@@ -50,35 +33,20 @@ def percent_inside(inner_box, outer_box):
     # Tỷ lệ phần trăm diện tích của inner_box nằm trong outer_box
     return inter_area / inner_area if inner_area > 0 else 0
 
-def check_baby_in_crib(crib_boxes, baby_boxes):
-    """Kiểm tra xem có em bé nào nằm trong nôi không"""
-    for baby in baby_boxes:
-        for crib in crib_boxes:
-            if percent_inside(baby, crib) >= 0.8:
-                return True
-
-    return False
-
-def check_face_in_crib(crib_boxes, face_box):
+def check_face_in_crib(crib_box, face_box):
     """Kiểm tra xem có mặt em bé nào nằm trong nôi không."""
-    for crib in crib_boxes:
-        if percent_inside(face_box, crib) >= 0.8:
-            return True
+    if percent_inside(face_box, crib_box) >= 0.8:
+        return True
 
     return False
 
-def get_crib_image(input_image_path, crib_boxes):
+def get_crib_image(input_image_path, crib_box):
     """Hàm lấy hình ảnh của nôi em bé"""
-    if not crib_boxes:
+    if not crib_box:
         return None
-
-    x1 = min(box[0] for box in crib_boxes)
-    y1 = min(box[1] for box in crib_boxes)
-    x2 = max(box[2] for box in crib_boxes)
-    y2 = max(box[3] for box in crib_boxes)
-
+        
     image = Image.open(input_image_path)
-    cropped = image.crop([x1, y1, x2, y2])  
+    cropped = image.crop(crib_box)  
     return cropped
 
 def check_baby_down_pose(image):
@@ -89,7 +57,7 @@ def check_baby_down_pose(image):
     if not baby_poses: 
         return False
 
-    baby_pose = baby_poses[0]
+    baby_pose = baby_poses
 
     for box in baby_pose[0].boxes:
         class_id = int(box.cls.item())  # 0: 'baby-lying-on-back', 1: 'baby-lying-on-side', 2: 'baby-lying-on-stomach'

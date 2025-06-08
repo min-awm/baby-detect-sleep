@@ -7,7 +7,7 @@ cred_path = get_abs_path("baby-sleep-3085d-firebase-adminsdk-fbsvc-40a2ca0158.js
 cred = credentials.Certificate(cred_path)
 
 firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://baby-monitor-58b3f-default-rtdb.firebaseio.com/'
+    'databaseURL': 'https://baby-sleep-3085d-default-rtdb.asia-southeast1.firebasedatabase.app/'
 })
 
 # Biến toàn cục theo dõi thời điểm gửi gần nhất
@@ -53,7 +53,10 @@ def send_notification_to_user(body):
 
 # db.reference('/users/user1').listen(listener)
 
-# ref = db.reference('/users/user1')
-# user_data = ref.get()
-# print(user_data)
+ref_crib_box = db.reference('/crib_box')
+
+def get_crib_box():
+    """Lấy thông tin vị trí cũi từ Firebase"""
+    crib_box = ref_crib_box.get()
+    return crib_box
 

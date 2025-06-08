@@ -2,11 +2,12 @@ import datetime
 import tempfile
 import os
 from typing import Union
-from fastapi import FastAPI, Request, File
+from fastapi import FastAPI, Request, File, WebSocket
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from vision.detection import run_detection
 from helper.path import get_abs_path
+from helper import ws_manager  
 
 app = FastAPI()
 
@@ -35,6 +36,19 @@ async def sound(request: Request):
     except Exception as e:
         print(e)
         return JSONResponse(content={"error": str(e)}, status_code=500)
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket): 
+    await websocket.accept()
+    ws_manager.websocket_connection = websocket
+    try:
+        while True:
+            data = await websocket.receive_text()
+            print(f"Data: {data}")
+    except RuntimeError:
+        print("Connection closed unexpectedly")
+    finally:
+        ws_manager.websocket_connection = None
 
 # Mount static folder tại root "/"
 app.mount(
