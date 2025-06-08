@@ -7,13 +7,19 @@
       <div class="flex items-center gap-2">
         <h1 class="font-semibold text-gray-800">{{ title }}</h1>
       </div>
+
+      <div class="flex items-center gap-2">
+        <a href="">
+          <RefreshCw />
+        </a>
+      </div>
     </div>
 
     <Home v-if="page == 0" />
     <Alert v-if="page == 1" />
 
     <!-- Bottom Navigation -->
-    <div
+    <!-- <div
       class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t border-gray-200"
     >
       <div class="grid grid-cols-2 gap-1 p-2">
@@ -36,13 +42,13 @@
           >
         </button>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from "vue";
-import { Camera, Bell } from "lucide-vue-next";
+import { ref, computed } from "vue";
+import { RefreshCw } from "lucide-vue-next";
 import Home from "./components/Home.vue";
 import Alert from "./components/Alert.vue";
 

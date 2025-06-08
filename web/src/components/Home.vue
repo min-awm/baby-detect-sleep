@@ -6,12 +6,14 @@
         <div
           class="relative aspect-[4/3] bg-gradient-to-br from-gray-800 to-gray-900"
         >
+          <img src="" alt="" srcset="" ref="imgResult" />
           <!-- Status indicators -->
           <div class="absolute top-3 left-3 flex gap-2">
             <span
               class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
             >
-              <span class="text-green-500">●</span>&nbsp;LIVE
+              <span class="text-green-500">●</span>
+              &nbsp;LIVE
             </span>
             <span
               :class="[
@@ -26,12 +28,12 @@
           </div>
 
           <!-- Setting -->
-          <div
+          <!-- <div
             class="absolute top-3 right-3 z-50"
             @click="showSettingModal = true"
           >
             <Settings class="text-white" />
-          </div>
+          </div> -->
 
           <!-- Detection overlay -->
           <div
@@ -74,7 +76,7 @@
   <div class="h-24"></div>
 
   <!-- Setting modal -->
-  <div
+  <!-- <div
     class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
     v-if="showSettingModal"
   >
@@ -83,7 +85,6 @@
         Cài đặt vị trí nôi
       </h3>
 
-      <!-- Preview area -->
       <div
         class="relative aspect-[4/3] bg-gray-100 rounded-lg mb-4 overflow-hidden"
       >
@@ -118,7 +119,6 @@
         />
       </div>
 
-      <!-- Position controls -->
       <button
         @click="saveCribPosition"
         class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mb-5"
@@ -126,7 +126,6 @@
         Tự động lấy vị trí
       </button>
 
-      <!-- Action buttons -->
       <div class="flex gap-3">
         <button
           @click="showSettingModal = false"
@@ -142,7 +141,7 @@
         </button>
       </div>
     </div>
-  </div>
+  </div> -->
 </template>
 
 <script setup>
@@ -150,59 +149,38 @@ import { ref, onMounted, onUnmounted, computed } from "vue";
 import { AlertTriangle, CheckCircle, Settings } from "lucide-vue-next";
 
 const showSettingModal = ref(false);
-const currentAlert = ref("Em bé nằm nghiêng");
-const babyStatus = ref("Cảnh báo");
-
-const recentAlerts = ref([
-  { id: 1, message: "Em bé nằm nghiêng", time: "2 phút trước" },
-  { id: 2, message: "Em bé không có trong cũi", time: "15 phút trước" },
-  { id: 3, message: "Em bé úp mặt", time: "1 giờ trước" },
-]);
-
-// Alert simulation
-const alerts = [
-  "Em bé nằm nghiêng",
-  "Em bé không có trong cũi",
-  "Em bé úp mặt",
-  "Em bé thức giấc",
-  null, // No alert
-];
-
-let alertInterval = null;
-
-const dismissAlert = () => {
-  currentAlert.value = null;
-  babyStatus.value = "An toàn";
-};
-
-const simulateAlerts = () => {
-  const randomAlert = alerts[Math.floor(Math.random() * alerts.length)];
-  currentAlert.value = randomAlert;
-  babyStatus.value = randomAlert ? "Cảnh báo" : "An toàn";
-
-  // Add to recent alerts if there's a new alert
-  if (randomAlert) {
-    recentAlerts.value.unshift({
-      id: Date.now(),
-      message: randomAlert,
-      time: "Vừa xong",
-    });
-    // Keep only last 5 alerts
-    if (recentAlerts.value.length > 5) {
-      recentAlerts.value.pop();
-    }
-  }
-};
+const currentAlert = ref();
+const babyStatus = ref("An toàn");
+const imgResult = ref();
 
 // Lifecycle hooks
 onMounted(() => {
-  alertInterval = setInterval(simulateAlerts, 8000);
-});
+  const ws = new WebSocket("ws://103.70.12.120:8000/ws");
+  ws.binaryType = "arraybuffer";
 
-onUnmounted(() => {
-  if (alertInterval) {
-    clearInterval(alertInterval);
-  }
+  ws.onmessage = function (event) {
+    if (event.data instanceof ArrayBuffer) {
+      const blob = new Blob([event.data], { type: "image/jpg" });
+      const url = URL.createObjectURL(blob);
+      imgResult.value.src = url;
+    } else {
+      const data = JSON.parse(event.data);
+
+      if (data.baby_down_pose_result) {
+        babyStatus.value = "Cảnh báo";
+        currentAlert.value = "Em bé úp mặt";
+      } else if (data.baby_not_in_crib_result) {
+        babyStatus.value = "Cảnh báo";
+        currentAlert.value = "Em bé không có trong nôi";
+      } else if (data.unknown_person_result) {
+        babyStatus.value = "Cảnh báo";
+        currentAlert.value = "Có người lạ";
+      } else {
+        babyStatus.value = "An toàn";
+        currentAlert.value = null;
+      }
+    }
+  };
 });
 </script>
 
