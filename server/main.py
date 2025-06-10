@@ -52,7 +52,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
 # Mount static folder tại root "/"
 app.mount(
-    "/admin", 
+    "/app", 
     StaticFiles(directory=get_abs_path("static", __file__), html=True), 
     name="static"
 )
