@@ -73,6 +73,8 @@
     </div>
   </div>
 
+  <!-- <InputCrib /> -->
+
   <div class="h-24"></div>
 
   <!-- Setting modal -->
@@ -147,6 +149,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { AlertTriangle, CheckCircle, Settings } from "lucide-vue-next";
+import InputCrib from "./InputCrib.vue";
 
 const showSettingModal = ref(false);
 const currentAlert = ref();
@@ -155,7 +158,7 @@ const imgResult = ref();
 
 // Lifecycle hooks
 onMounted(() => {
-  const ws = new WebSocket("ws://103.70.12.120:8000/ws");
+  const ws = new WebSocket("ws://103.70.13.74:8000/ws");
   ws.binaryType = "arraybuffer";
 
   ws.onmessage = function (event) {
