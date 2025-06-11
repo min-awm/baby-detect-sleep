@@ -18,7 +18,7 @@
             <span
               :class="[
                 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
-                babyStatus === 'Cảnh báo'
+                babyStatus === 'Alert'
                   ? 'bg-red-100 text-red-800'
                   : 'bg-blue-100 text-blue-800',
               ]"
@@ -51,22 +51,22 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <CheckCircle
-            v-if="babyStatus === 'An toàn'"
+            v-if="babyStatus === 'Safe'"
             class="h-8 w-8 text-green-500"
           />
           <AlertTriangle v-else class="h-8 w-8 text-red-500" />
           <div>
             <h3 class="font-semibold text-gray-800">
-              {{ babyStatus === "An toàn" ? "Em bé an toàn" : "Cần chú ý" }}
+              {{ babyStatus === "Safe" ? "Safe" : "Warning" }}
             </h3>
             <p class="text-sm text-gray-600">
-              {{ currentAlert || "Tư thế bình thường" }}
+              {{ currentAlert || "Baby normal" }}
             </p>
           </div>
         </div>
         <div class="text-right">
           <div class="text-2xl font-bold text-gray-800">
-            {{ babyStatus === "An toàn" ? "✓" : "!" }}
+            {{ babyStatus === "Safe" ? "✓" : "!" }}
           </div>
         </div>
       </div>
@@ -153,7 +153,7 @@ import InputCrib from "./InputCrib.vue";
 
 const showSettingModal = ref(false);
 const currentAlert = ref();
-const babyStatus = ref("An toàn");
+const babyStatus = ref("Safe");
 const imgResult = ref();
 
 // Lifecycle hooks
@@ -170,16 +170,16 @@ onMounted(() => {
       const data = JSON.parse(event.data);
 
       if (data.baby_down_pose_result) {
-        babyStatus.value = "Cảnh báo";
-        currentAlert.value = "Em bé úp mặt";
+        babyStatus.value = "Alert";
+        currentAlert.value = "Baby face down";
       } else if (data.baby_not_in_crib_result) {
-        babyStatus.value = "Cảnh báo";
-        currentAlert.value = "Em bé không có trong nôi";
+        babyStatus.value = "Alert";
+        currentAlert.value = "Baby not in crib";
       } else if (data.unknown_person_result) {
-        babyStatus.value = "Cảnh báo";
-        currentAlert.value = "Có người lạ";
+        babyStatus.value = "Alert";
+        currentAlert.value = "Stranger detection near the crib";
       } else {
-        babyStatus.value = "An toàn";
+        babyStatus.value = "Safe";
         currentAlert.value = null;
       }
     }
